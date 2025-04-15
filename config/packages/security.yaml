@@ -23,6 +23,7 @@ security:
                 enable_csrf: true
                 username_parameter: email
                 password_parameter: password
+                default_target_path: app_profile
             logout:
                 path: app_logout
                 target: app_home
@@ -31,7 +32,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/profile, roles: [ROLE_CLIENT, ROLE_PRESTATAIRE] }
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: PUBLIC_ACCESS }

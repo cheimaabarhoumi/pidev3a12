@@ -104,6 +104,7 @@ class UserController extends AbstractController
     {
         $user = $this->getUser();
         if (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté pour accéder à cette page.');
             return $this->redirectToRoute('app_login');
         }
 
@@ -111,7 +112,8 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = $form->get('plainPassword')->getData();
+            // Si un nouveau mot de passe est fourni
+            $plainPassword = $form->get('motdepasse')->getData();
             if ($plainPassword) {
                 $user->setMotdepasse(
                     $userPasswordHasher->hashPassword(
@@ -130,6 +132,7 @@ class UserController extends AbstractController
 
         return $this->render('user/profile.html.twig', [
             'form' => $form->createView(),
+            'user' => $user
         ]);
     }
 

@@ -7,48 +7,72 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">
-                    <h1 class="h3 mb-3 font-weight-normal text-center">Mon Profil</h1>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h1 class="h3 mb-0 font-weight-normal">Mon Profil</h1>
+                    <a href="{{ path('app_logout') }}" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
                 </div>
                 <div class="card-body">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Informations personnelles</h5>
+                            <p><strong>Nom :</strong> {{ user.nom }}</p>
+                            <p><strong>Prénom :</strong> {{ user.prenom }}</p>
+                            <p><strong>Email :</strong> {{ user.email }}</p>
+                            <p><strong>CIN :</strong> {{ user.cin }}</p>
+                            <p><strong>Rôle :</strong> {{ user.role }}</p>
+                        </div>
+                        {% if user.role == 'prestataire' %}
+                            <div class="col-md-6">
+                                <h5>Informations professionnelles</h5>
+                                <p><strong>Réputation :</strong> {{ user.reputation ?? 'Non évalué' }}</p>
+                                <p><strong>Tarif :</strong> {{ user.tarif ?? 'Non défini' }} €</p>
+                                <p><strong>Services :</strong> {{ user.services ?? 'Non défini' }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <h5 class="mb-3">Modifier mes informations</h5>
                     {{ form_start(form) }}
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ form_row(form.nom) }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form_row(form.prenom) }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ form_row(form.email) }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form_row(form.cin) }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ form_row(form.reputation) }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form_row(form.tarif) }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                {{ form_row(form.services) }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                {{ form_row(form.plainPassword) }}
-                            </div>
-                        </div>
+                        {{ form_row(form.nom, {
+                            'attr': {'class': 'form-control'},
+                            'label_attr': {'class': 'form-label'}
+                        }) }}
+                        {{ form_row(form.prenom, {
+                            'attr': {'class': 'form-control'},
+                            'label_attr': {'class': 'form-label'}
+                        }) }}
+                        {{ form_row(form.email, {
+                            'attr': {'class': 'form-control'},
+                            'label_attr': {'class': 'form-label'}
+                        }) }}
+                        {{ form_row(form.cin, {
+                            'attr': {'class': 'form-control'},
+                            'label_attr': {'class': 'form-label'}
+                        }) }}
+                        {{ form_row(form.motdepasse, {
+                            'attr': {'class': 'form-control'},
+                            'label_attr': {'class': 'form-label'},
+                            'required': false,
+                            'help': 'Laissez vide pour ne pas changer le mot de passe'
+                        }) }}
 
                         <div class="d-grid gap-2 mt-3">
-                            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                            <a href="{{ path('app_home') }}" class="btn btn-secondary">Retour à l'accueil</a>
                         </div>
                     {{ form_end(form) }}
                 </div>
