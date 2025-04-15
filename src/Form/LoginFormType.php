@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class LoginFormType extends AbstractType
 {
@@ -26,6 +27,7 @@ class LoginFormType extends AbstractType
                         'message' => 'Veuillez entrer votre email',
                     ]),
                 ],
+                'label_attr' => ['class' => 'form-label']
             ])
             ->add('password', PasswordType::class, [
                 'label' => 'Mot de passe',
@@ -39,6 +41,11 @@ class LoginFormType extends AbstractType
                         'message' => 'Veuillez entrer votre mot de passe',
                     ]),
                 ],
+                'label_attr' => ['class' => 'form-label']
+            ])
+            ->add('recaptcha_token', HiddenType::class, [
+                'mapped' => false,
+                'attr' => ['id' => 'recaptcha_token']
             ]);
     }
 

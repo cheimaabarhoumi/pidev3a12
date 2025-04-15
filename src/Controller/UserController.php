@@ -82,13 +82,10 @@ class UserController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        $form = $this->createForm(LoginFormType::class, [
-            'email' => $lastUsername
-        ]);
-
         return $this->render('user/login.html.twig', [
-            'form' => $form->createView(),
             'error' => $error,
+            'last_username' => $lastUsername,
+            'recaptcha_site_key' => $this->getParameter('recaptcha.site_key'),
         ]);
     }
 

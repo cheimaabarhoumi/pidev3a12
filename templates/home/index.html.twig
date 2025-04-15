@@ -66,6 +66,20 @@
                     margin-bottom: 5px;
                 }
             }
+            .welcome-buttons {
+                display: flex;
+                gap: 15px;
+                margin-top: 20px;
+            }
+            .welcome-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+            .welcome-btn i {
+                font-size: 16px;
+            }
         </style>
         {% endblock %} 
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -153,7 +167,14 @@
 					<p>
 						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore   magna aliqua. 
 					</p>
-					<button class="welcome-btn" onclick="window.location.href='#'">contact us</button>
+					<div class="welcome-buttons">
+						<button class="welcome-btn" onclick="window.location.href='#'">contact us</button>
+						{% if not app.user %}
+							<a href="{{ path('app_login') }}" class="welcome-btn" style="background-color: #4CAF50;">
+								<i class="fa fa-sign-in"></i> Se connecter
+							</a>
+						{% endif %}
+					</div>
 				</div>
 			</div>
 

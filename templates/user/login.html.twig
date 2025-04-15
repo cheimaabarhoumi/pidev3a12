@@ -8,28 +8,56 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h1 class="h3 mb-3 font-weight-normal text-center">Connexion</h1>
+                    <h1 class="h3 mb-3 font-weight-normal">Connexion</h1>
                 </div>
                 <div class="card-body">
                     {% if error %}
                         <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
                     {% endif %}
 
-                    {{ form_start(form) }}
-                        {{ form_row(form.email) }}
-                        {{ form_row(form.password) }}
+                    <form method="post" id="login-form" onsubmit="return validateForm()">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" value="{{ last_username }}" name="email" id="email" class="form-control" autocomplete="email" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <input type="password" name="password" id="password" class="form-control" autocomplete="current-password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}" data-callback="enableSubmit"></div>
+                        </div>
+                        
+                        <input type="hidden" name="recaptcha_token" id="recaptcha_token">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
                         <div class="d-grid gap-2 mt-3">
-                            <button type="submit" class="btn btn-primary">Se connecter</button>
+                            <button class="btn btn-lg btn-primary" type="submit" id="submit-button" disabled>
+                                Se connecter
+                            </button>
+                            <a href="{{ path('app_register') }}" class="btn btn-link">Pas encore de compte ? S'inscrire</a>
                         </div>
-                    {{ form_end(form) }}
-
-                    <div class="text-center mt-3">
-                        <p>Pas encore inscrit ? <a href="{{ path('app_register') }}">Inscrivez-vous</a></p>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://www.google.com/recaptcha/api.js"></script>
+<script>
+    function enableSubmit(response) {
+        document.getElementById('recaptcha_token').value = response;
+        document.getElementById('submit-button').disabled = false;
+    }
+
+    function validateForm() {
+        if (!document.getElementById('recaptcha_token').value) {
+            alert('Veuillez compléter le reCAPTCHA pour vous connecter.');
+            return false;
+        }
+        return true;
+    }
+</script>
 {% endblock %} 
