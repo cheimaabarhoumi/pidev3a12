@@ -1,0 +1,40 @@
+{% extends '/front/accueil/accueil.html.twig' %}
+
+{% block title %}Détails de l'Annonce - CarVilla{% endblock %}
+{% block accueil_services %}{% endblock %}
+{% block accueil_featured %}{% endblock %}
+{% block recherche %}{% endblock %}
+
+{% block accueil_voitures %}
+<section id="car-details" class="py-5" style="background-color:rgb(243, 245, 247);">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <h2 class="fw-bold">Détails de l'Annonce</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <img src="{{ asset('uploads/' ~ annonce.voiture.image) }}"
+                     alt="{{ annonce.voiture.marque }} {{ annonce.voiture.modele }}"
+                     class="img-fluid rounded-4" style="height: 350px; object-fit: cover;">
+            </div>
+            <div class="col-lg-6">
+                <h3 class="text-dark"><p><strong>Titre </strong>{{ annonce.titre }} </h3>
+				<p><strong>Description:</strong> {{ annonce.description }}</p>
+				<p><strong>Marque:</strong> {{ annonce.voiture.marque }} {{ annonce.voiture.modele }}</p>
+                <p><strong>Année:</strong> {{ annonce.voiture.annee }}</p>
+                <p><strong>Kilométrage:</strong> {{ annonce.voiture.kilometrage }} km</p>
+                <p><strong>Puissance Fiscale:</strong> {{ annonce.voiture.puissanceFiscale }} CV</p>
+                <p><strong>Prix:</strong> {{ annonce.voiture.prix ? annonce.voiture.prix ~ ' TND' : 'Non spécifié' }}</p>
+                <p><strong>Description:</strong> {{ annonce.description }}</p>
+                
+
+                <a href="{{ path('edit_annonce', { id: annonce.id }) }}" class="btn btn-warning mt-3">Modifier</a>
+                <form action="{{ path('annonce_delete', {id: annonce.id}) }}" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer cette annonce ?');" style="display: inline;">
+                    <button class="btn btn-danger mt-3" type="submit">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
