@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Clause{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h4>📝 Nouvelle Clause</h4>
+        </div>
+        <div class="card-body">
+        {{ include('clause_contrat/_form.html.twig', {
+            'button_label': 'Créer la clause',
+            'contratId': contratId
+        }) }}
+
+        </div>
+    </div>
+</div>
+{% endblock %} 

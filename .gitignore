@@ -1,3 +1,19 @@
+/vendor/
+/node_modules/
+/.env
+/.env.local
+/.env.*.local
+/var/
+/public/bundles/
+/public/build/
+/phpunit.xml
+.phpunit.result.cache
+/.phpunit.result.cache
+/composer.lock
+/package-lock.json
+/yarn.lock
+.DS_Store
+Thumbs.db
 
 ###> symfony/framework-bundle ###
 /.env.local
@@ -23,3 +39,10 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+###> symfony/webpack-encore-bundle ###
+/node_modules/
+/public/build/
+npm-debug.log
+yarn-error.log
+###< symfony/webpack-encore-bundle ###

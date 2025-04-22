@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Contrat - {{ contrat.reference }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.6; }
+        h1 { font-size: 18px; }
+        .section { margin-bottom: 20px; }
+        .label { font-weight: bold; }
+        .value { margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Contrat {{ contrat.reference }}</h1>
+
+    <div class="section">
+        <div><span class="label">Intitulé:</span> {{ contrat.intitule }}</div>
+        <div><span class="label">Description:</span> {{ contrat.description ?: 'Aucune' }}</div>
+        <div><span class="label">Date Début:</span> {{ contrat.dateDebut|date('d/m/Y') }}</div>
+        <div><span class="label">Date Fin:</span> {{ contrat.dateFin|date('d/m/Y') }}</div>
+        <div><span class="label">Date Signature:</span> {{ contrat.dateSignature ? contrat.dateSignature|date('d/m/Y') : 'Non signée' }}</div>
+        <div><span class="label">Montant:</span> {{ contrat.montant|number_format(2, ',', ' ') }} €</div>
+        <div><span class="label">Mode Paiement:</span> {{ contrat.modePaiement }}</div>
+        <div><span class="label">Statut:</span> {{ contrat.statut }}</div>
+        <div><span class="label">Client:</span> {{ contrat.client.nom ?? 'Non défini' }}</div>
+        <div><span class="label">Utilisateur:</span> {{ contrat.utilisateur.nom ?? 'Non défini' }}</div>
+    </div>
+
+    <div class="section">
+        <div><span class="label">Clauses Particulières:</span></div>
+        <div>{{ contrat.clausesParticulieres ?: 'Aucune' }}</div>
+    </div>
+</body>
+</html>
