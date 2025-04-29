@@ -11,7 +11,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-
+use App\Service\LegalTermGeneratorService;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 #[Route('/clause-contrat')]
 final class ClauseContratController extends AbstractController
 {
@@ -119,6 +121,27 @@ final class ClauseContratController extends AbstractController
             'contratId' => $contratId
         ], Response::HTTP_SEE_OTHER);
     }
+    #[Route('/generate-content/{type}', name: 'app_clause_contrat_generate_content', methods: ['GET'])]
+    public function generateContent(string $type, LegalTermGeneratorService $legalTermGeneratorService): JsonResponse
+    {
+        $generatedText = $legalTermGeneratorService->generateClause($type);
 
+        return new JsonResponse(['content' => $generatedText]);
+    }
+
+    #[Route('/clause/generate', name: 'clause_generate', methods: ['POST'])]
+    public function generateClauseContent(Request $request, LegalTermGeneratorService $generatorService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $type = $data['type'] ?? null;
+    
+        if (!$type) {
+            return new JsonResponse(['error' => 'Type manquant'], 400);
+        }
+    
+        $content = $generatorService->generateClause($type);
+    
+        return new JsonResponse(['content' => $content]);
+    }
     
 } 

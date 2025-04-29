@@ -3,6 +3,6 @@
       onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?');"
       style="display:inline;">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ contrat.idContrat) }}">
-    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+    <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
 </form>
 

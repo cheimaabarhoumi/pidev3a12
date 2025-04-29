@@ -93,15 +93,39 @@
     </div>
 </div>
 {# Search Form #}
-<div class="row mb-4">
+{# <div class="row mb-4">
     <div class="col-12">
         <form method="get" class="input-group">
             <input type="text" name="q" class="form-control" placeholder="Rechercher un contrat" value="{{ search_term }}">
             <button type="submit" class="btn btn-primary">Rechercher</button>
         </form>
     </div>
+</div> #}
+<div class="row mb-4">
+    <div class="col-12">
+        <input type="text" id="search-input" class="form-control" placeholder="Rechercher un contrat" autocomplete="off">
+    </div>
 </div>
+<!-- R
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Référence</th>
+            <th>Intitulé</th>
+            <th>Date début</th>
+            <th>Date fin</th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>Clauses</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="contrat-results">
+        {% include 'admin/contrat/_search_results.html.twig' with {contrats: contrats} %}
+    </tbody>
+</table>
 
+ecent Contracts Section -->
 <div class="row mt-4">
     <div class="col-12">
         <div class="card">
@@ -115,60 +139,21 @@
             </div>
             <div class="card-body px-0 pt-0 pb-2">
                 <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
+                    <table class="table align-items-center mb-0 table-striped">
                         <thead>
                             <tr>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Référence</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Intitulé</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Début</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Fin</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Montant</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Statut</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Clauses</th>
                                 <th class="text-secondary opacity-7"></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for contrat in recent_contracts %}
-                            <tr>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ contrat.reference }}</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <p class="text-sm font-weight-bold mb-0">{{ contrat.intitule }}</p>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-secondary text-xs font-weight-bold">{{ contrat.dateDebut|date('d/m/Y') }}</span>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-secondary text-xs font-weight-bold">{{ contrat.montant|number_format(2, ',', ' ') }} €</span>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="badge badge-sm bg-gradient-{{ contrat.statut == 'Actif' ? 'success' : (contrat.statut == 'En attente' ? 'warning' : 'danger') }}">{{ contrat.statut }}</span>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <a href="{{ path('app_clause_contrat_index', {'contratId': contrat.idContrat}) }}" class="btn btn-info btn-sm" title="Gérer les clauses">
-                                        <i class="fas fa-file-contract"></i> {{ contrat.clauses|length }}
-                                    </a>
-                                </td>
-                                <td class="align-middle">
-                                    <a href="{{ path('admin_contrat_show', {'id': contrat.idContrat}) }}" class="btn btn-info btn-sm" title="Voir">
-                                        <i class="fas fa-eye"></i> 👁️ Voir
-                                    </a>
-                                    <a href="{{ path('admin_contrat_edit', {'id': contrat.idContrat}) }}" class="btn btn-warning btn-sm" title="Modifier">
-                                        <i class="fas fa-edit"></i> 📝 Modifier
-                                    </a>
-                                    {{ include('admin/contrat/_delete_form.html.twig', {'contrat': contrat}) }}
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="7" class="text-center">Aucun contrat trouvé</td>
-                            </tr>
-                            {% endfor %}
+                        <tbody id="contrat-results">
+                            {% include 'admin/contrat/_search_results.html.twig' with {contrats: contrats} %}
                         </tbody>
                     </table>
                 </div>
@@ -176,4 +161,30 @@
         </div>
     </div>
 </div>
+
+
+
+
 {% endblock %} 
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('search-input');
+        const resultsContainer = document.getElementById('contrat-results');
+
+        input.addEventListener('input', function () {
+            const query = input.value;
+
+            fetch(`/admin/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.text())
+                .then(html => {
+                    resultsContainer.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error('Erreur AJAX :', err);
+                });
+        });
+    });
+    </script>
+{% endblock %}

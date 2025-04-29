@@ -92,7 +92,6 @@ class ContratType extends AbstractType
             ->add('renouvellement_automatique', CheckboxType::class, [
                 'required' => false,
                 'label' => 'Renouvellement automatique',
-                'required' => false,
             ])
             ->add('date_prochaine_revision', null, [
                 'widget' => 'single_text',

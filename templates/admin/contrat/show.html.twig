@@ -64,6 +64,12 @@
                             <label>Clauses Particulières</label>
                             <p class="form-control-static">{{ contrat.clausesParticulieres ?: 'Aucune' }}</p>
                         </div>
+                        {% if signature is not null %}
+                        <h5>Signature :</h5>
+                        <img src="{{ signature.base64 }}" alt="Signature" style="max-width: 300px;"/>
+                    {% else %}
+                        <p>Aucune signature enregistrée.</p>
+                    {% endif %}
                     </div>
 
                     <!-- Colonne droite -->
@@ -128,7 +134,7 @@
                             <div class="card-header pb-0">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0">Clauses du Contrat</h5>
-                                    <a href="{{ path('app_clause_contrat_index', {'contratId': contrat.idContrat}) }}" class="btn btn-primary btn-sm mb-0">
+                                    <a href="{{ path('admin_clause_contrat_index', {'contratId': contrat.idContrat}) }}" class="btn btn-primary btn-sm mb-0">
                                         <i class="fas fa-plus"></i> Gérer les clauses
                                     </a>
                                 </div>
@@ -154,11 +160,17 @@
                                                             <span class="badge bg-info">{{ clause.type }}</span>
                                                         </td>
                                                         <td>
-                                                            <a href="{{ path('app_clause_contrat_show', {'id': clause.idClause}) }}" class="btn btn-info btn-sm" title="Voir">
-                                                                <i class="fas fa-eye"></i>
+                                                            <a href="{{ path('admin_clause_contrat_show', {
+                                                                    'contratId': contrat.idContrat,
+                                                                    'id': clause.idClause
+                                                                     }) }}" class="btn btn-info btn-sm" title="Voir">
+                                                                <i class="fas fa-eye">👁️ Voir</i>
                                                             </a>
-                                                            <a href="{{ path('app_clause_contrat_edit', {'id': clause.idClause}) }}" class="btn btn-warning btn-sm" title="Modifier">
-                                                                <i class="fas fa-edit"></i>
+                                                            <a href="{{ path('admin_clause_contrat_edit', {
+                                                                'contratId': contrat.idContrat,
+                                                                'id': clause.idClause
+                                                                }) }}" class="btn btn-warning btn-sm" title="Modifier">
+                                                                <i class="fas fa-edit">✏️ Modifier</i>
                                                             </a>
                                                         </td>
                                                     </tr>

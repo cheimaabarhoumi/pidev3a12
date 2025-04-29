@@ -84,4 +84,32 @@ class ContratRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }    
+
+    public function findExpiringSoon(): array
+    {
+        $now = new \DateTimeImmutable();
+        $limitDate = $now->modify('+7 days');
+
+        return $this->createQueryBuilder('c')
+            ->where('c.dateFin BETWEEN :now AND :limit')
+            ->setParameter('now', $now)
+            ->setParameter('limit', $limitDate)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function updateExpiredContracts(): void
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->update()
+            ->set('c.statut', ':expiré')
+            ->where('c.dateFin < :now')
+            ->andWhere('c.statut != :expiré')
+            ->setParameter('expiré', 'expiré')
+            ->setParameter('now', new \DateTimeImmutable());
+    
+        $qb->getQuery()->execute();
+    }
+    
+
 }
