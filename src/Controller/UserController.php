@@ -7,26 +7,40 @@ use App\Form\LoginFormType;
 use App\Form\RegistrationFormType;
 use App\Form\UserProfileType;
 use App\Repository\UserRepository;
+use App\Service\EmailService;
+use App\Service\PdfService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Psr\Log\LoggerInterface;
 
 class UserController extends AbstractController
 {
-    #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
     {
+        $this->logger = $logger;
+    }
+
+    #[Route('/register', name: 'app_register')]
+    public function register(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface $entityManager,
+        EmailService $emailService
+    ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
             if (!$form->isValid()) {
-                // Get all form errors
                 $errors = [];
                 foreach ($form->getErrors(true) as $error) {
                     $errors[] = $error->getMessage();
@@ -34,7 +48,6 @@ class UserController extends AbstractController
                 $this->addFlash('error', implode('<br>', $errors));
             } else {
                 try {
-                    // Get the plain password from the form
                     $plainPassword = $form->get('motdepasse')->getData();
                     
                     if (!$plainPassword) {
@@ -44,7 +57,6 @@ class UserController extends AbstractController
                         ]);
                     }
 
-                    // encode the plain password
                     $user->setMotdepasse(
                         $userPasswordHasher->hashPassword(
                             $user,
@@ -52,7 +64,6 @@ class UserController extends AbstractController
                         )
                     );
 
-                    // Set default role if none is provided
                     if (!$user->getRole()) {
                         $user->setRole('client');
                     }
@@ -60,11 +71,22 @@ class UserController extends AbstractController
                     $entityManager->persist($user);
                     $entityManager->flush();
 
-                    $this->addFlash('success', 'Votre compte a été créé avec succès !');
+                    // Email sending with enhanced error handling
+                    try {
+                        if ($emailService->sendWelcomeEmail($user->getEmail(), $user->getPrenom())) {
+                            $this->addFlash('success', 'Votre compte a été créé avec succès ! Un email de bienvenue a été envoyé.');
+                        } else {
+                            $this->addFlash('warning', 'Compte créé mais échec d\'envoi du mail de bienvenue');
+                        }
+                    } catch (\Exception $emailException) {
+                        $this->logger->error('Email sending failed: '.$emailException->getMessage());
+                        $this->addFlash('warning', 'Compte créé mais problème d\'envoi du mail de confirmation');
+                    }
 
                     return $this->redirectToRoute('app_login');
                 } catch (\Exception $e) {
-                    $this->addFlash('error', 'Une erreur est survenue lors de la création du compte : ' . $e->getMessage());
+                    $this->logger->error('Registration failed: '.$e->getMessage());
+                    $this->addFlash('error', 'Une erreur est survenue lors de la création du compte : '.$e->getMessage());
                 }
             }
         }
@@ -77,10 +99,22 @@ class UserController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
-        // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
+
+        // Check if the user is logged in
+        if ($this->getUser()) {
+            // Check if the user is verified
+            if (!$this->getUser()->isVerified()) {
+                // Log the user out
+                $this->addFlash('error', 'Votre compte n\'est pas vérifié. Veuillez vérifier votre email pour activer votre compte.');
+                // Redirect to the login page
+                return $this->redirectToRoute('app_login');
+            }
+
+            // If the user is verified, redirect to the dashboard or another route
+            return $this->redirectToRoute('app_dashboard'); // Change to your desired route
+        }
 
         return $this->render('user/login.html.twig', [
             'error' => $error,
@@ -92,7 +126,6 @@ class UserController extends AbstractController
     #[Route('/logout', name: 'app_logout')]
     public function logout(): void
     {
-        // controller can be blank: it will never be called!
         throw new \Exception('Don\'t forget to activate logout in security.yaml');
     }
 
@@ -109,7 +142,6 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Si un nouveau mot de passe est fourni
             $plainPassword = $form->get('motdepasse')->getData();
             if ($plainPassword) {
                 $user->setMotdepasse(
@@ -121,9 +153,7 @@ class UserController extends AbstractController
             }
 
             $entityManager->flush();
-
             $this->addFlash('success', 'Votre profil a été mis à jour avec succès !');
-
             return $this->redirectToRoute('app_profile');
         }
 
@@ -134,14 +164,22 @@ class UserController extends AbstractController
     }
 
     #[Route('/users', name: 'app_users')]
-    public function index(UserRepository $userRepository): Response
+    public function index(Request $request, UserRepository $userRepository): Response
     {
         $users = $userRepository->findAll();
+        
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('user/_users_table.html.twig', [
+                'users' => $users,
+            ]);
+        }
         
         return $this->render('user/index.html.twig', [
             'users' => $users,
         ]);
     }
+
+    
 
     #[Route('/user/show/{id}', name: 'app_user_show')]
     public function show(User $user): Response
@@ -159,9 +197,7 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
             $this->addFlash('success', 'L\'utilisateur a été modifié avec succès !');
-
             return $this->redirectToRoute('app_users');
         }
 
@@ -177,10 +213,62 @@ class UserController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
             $entityManager->remove($user);
             $entityManager->flush();
-
             $this->addFlash('success', 'L\'utilisateur a été supprimé avec succès !');
         }
 
         return $this->redirectToRoute('app_users');
     }
-} 
+
+    #[Route('/users/pdf', name: 'app_users_pdf')]
+    public function generatePdf(UserRepository $userRepository, PdfService $pdfService): Response
+    {
+        $users = $userRepository->findAll();
+        
+        $pdfContent = $pdfService->generateUsersPdf($users);
+
+        $response = new Response($pdfContent);
+        $response->headers->set('Content-Type', 'application/pdf');
+        $response->headers->set('Content-Disposition', $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'liste-utilisateurs.pdf'
+        ));
+
+        return $response;
+    }
+
+    #[Route('/user/toggle/{id}', name: 'app_user_toggle', methods: ['POST'])]
+    public function toggleUser(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    {
+        $token = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('toggle' . $user->getId(), $token)) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_users');
+        }
+
+        $user->setIsVerified(!$user->isVerified());
+        $entityManager->flush();
+        
+        $status = $user->isVerified() ? 'activé' : 'désactivé';
+        $this->addFlash('success', "L'utilisateur a été {$status} avec succès !");
+
+        return $this->redirectToRoute('app_users');
+    }
+
+    #[Route('/users/search', name: 'app_users_search', methods: ['GET'])]
+    public function ajaxSearch(Request $request, UserRepository $userRepository): Response
+    {
+        $query = $request->query->get('q', '');
+        $role = $request->query->get('role', '');
+        $sortBy = $request->query->get('sort', 'id');
+        $order = $request->query->get('order', 'ASC');
+    
+        $users = $userRepository->searchUsers($query, $role, $sortBy, $order);
+    
+        return $this->render('user/_users_table.html.twig', [
+            'users' => $users,
+        ]);
+    }
+    
+    
+
+}

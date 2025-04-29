@@ -12,16 +12,23 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class RecaptchaAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
     private $httpClient;
     private $recaptchaSecret;
+    private $csrfTokenManager;
 
-    public function __construct(HttpClientInterface $httpClient, string $recaptchaSecret)
-    {
+    public function __construct(
+        HttpClientInterface $httpClient, 
+        string $recaptchaSecret,
+        CsrfTokenManagerInterface $csrfTokenManager
+    ) {
         $this->httpClient = $httpClient;
         $this->recaptchaSecret = $recaptchaSecret;
+        $this->csrfTokenManager = $csrfTokenManager;
     }
 
     public function supports(Request $request): ?bool
@@ -31,6 +38,12 @@ class RecaptchaAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function authenticate(Request $request): Passport
     {
+        // Verify CSRF token
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('authenticate', $csrfToken))) {
+            throw new AuthenticationException('Invalid CSRF token.');
+        }
+
         $recaptchaToken = $request->request->get('recaptcha_token');
         
         if (!$recaptchaToken) {

@@ -8,6 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use SymfonyCasts\Bundle\VerifyEmail\Exception\ExpiredSignatureException;
+use SymfonyCasts\Bundle\VerifyEmail\Exception\InvalidSignatureException;
+use SymfonyCasts\Bundle\VerifyEmail\Model\VerifyEmailSignatureComponents;
+use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -106,10 +110,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20)]
     #[Assert\NotBlank(message: "Le rôle est obligatoire")]
     #[Assert\Choice(
-        choices: ['client', 'prestataire'],
-        message: "Le rôle doit être soit 'client' soit 'prestataire'"
+        choices: ['client', 'prestataire', 'admin'],
+        message: "Le rôle doit être soit 'client', 'prestataire' ou 'admin'"
     )]
     private ?string $role = null;
+
+    #[ORM\Column(type: 'boolean')]
+    private bool $isVerified = false;
 
     public function getId(): ?int
     {
@@ -215,12 +222,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+        $this->isVerified = $isVerified;
+        return $this;
+    }
+
     // UserInterface methods
     public function getRoles(): array
     {
         $roles = ['ROLE_' . strtoupper($this->role)];
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
+        
+        // If user is admin, add all necessary admin roles
+        if ($this->role === 'admin') {
+            $roles[] = 'ROLE_ADMIN';
+            $roles[] = 'ROLE_CLIENT';
+            $roles[] = 'ROLE_PRESTATAIRE';
+        }
+        
         return array_unique($roles);
     }
 

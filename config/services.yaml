@@ -26,3 +26,7 @@ services:
     App\Security\RecaptchaAuthenticator:
         arguments:
             $recaptchaSecret: '%env(RECAPTCHA_SECRET_KEY)%'
+            $csrfTokenManager: '@security.csrf.token_manager'
+
+    App\Security\LoginSuccessHandler:
+        tags: ['security.authentication_success_handler']
