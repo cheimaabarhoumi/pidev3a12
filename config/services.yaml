@@ -30,3 +30,8 @@ services:
 
     App\Security\LoginSuccessHandler:
         tags: ['security.authentication_success_handler']
+
+# config/services.yaml
+    App\Service\MailerService:
+        arguments:
+            $from: '%env(MAILER_FROM)%'
