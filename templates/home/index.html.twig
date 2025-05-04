@@ -8,7 +8,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
      
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-●	  <!-- title of site -->
+
+        <!-- title of site -->
         <title>{% block title %}CarVilla{% endblock %}</title>
 
 {% block css%}
@@ -29,6 +30,60 @@
         <link rel="stylesheet" href="{{ asset('assets/css/bootsnav.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
+
+        
+        <style>
+            .auth-buttons-container {
+                background-color: #f8f9fa;
+                padding: 10px 0;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .auth-buttons {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+            }
+            .auth-buttons .btn {
+                display: flex;
+                align-items: center;
+                padding: 8px 15px;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+                color: white;
+            }
+            .auth-buttons .btn i {
+                margin-right: 5px;
+            }
+            .auth-buttons .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+            @media (max-width: 768px) {
+                .auth-buttons {
+                    flex-direction: column;
+                }
+                .auth-buttons .btn {
+                    width: 100%;
+                    margin-bottom: 5px;
+                }
+            }
+            .welcome-buttons {
+                display: flex;
+                gap: 15px;
+                margin-top: 20px;
+            }
+            .welcome-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+            .welcome-btn i {
+                font-size: 16px;
+            }
+        </style>
+
         {% endblock %} 
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -48,6 +103,7 @@
 		<!--welcome-hero start -->
 		<section id="home" class="welcome-hero">
 ●	{% block body %}
+		
 			<!-- top-area Start -->
 			<div class="top-area">
 				<div class="header-area">
@@ -70,6 +126,8 @@
 				            <div class="collapse navbar-collapse menu-ui-design" id="navbar-menu">
 				                <ul class="nav navbar-nav navbar-right" data-in="fadeInDown" data-out="fadeOutUp">
 				                    <li class=" scroll active"><a href="#home">home</a></li>
+
+				                    <li class="scroll active"><a href="#home">home</a></li>
 				                    <li class="scroll"><a href="#service">service</a></li>
 				                    <li class="scroll"><a href="#featured-cars">featured cars</a></li>
 				                    <li class="scroll"><a href="#new-cars">new cars</a></li>
@@ -86,6 +144,30 @@
 			</div><!-- /.top-area-->
 			<!-- top-area End -->
 
+
+			<!-- Authentication Buttons -->
+			<div class="auth-buttons-container">
+			    <div class="container">
+			        <div class="auth-buttons">
+			            {% if app.user %}
+			                <a href="{{ path('app_profile') }}" class="btn btn-primary">
+			                    <i class="fa fa-user"></i> Mon Profil
+			                </a>
+			                <a href="{{ path('app_logout') }}" class="btn btn-danger">
+			                    <i class="fa fa-sign-out"></i> Déconnexion
+			                </a>
+			            {% else %}
+			                <a href="{{ path('app_login') }}" class="btn btn-success">
+			                    <i class="fa fa-sign-in"></i> Connexion
+			                </a>
+			                <a href="{{ path('app_register') }}" class="btn btn-info">
+			                    <i class="fa fa-user-plus"></i> Inscription
+			                </a>
+			            {% endif %}
+			        </div>
+			    </div>
+			</div>
+
 			<div class="container">
 				<div class="welcome-hero-txt">
 					<h2>get your desired car in resonable price</h2>
@@ -93,6 +175,15 @@
 						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore   magna aliqua. 
 					</p>
 					<button class="welcome-btn" onclick="window.location.href='#'">contact us</button>
+
+					<div class="welcome-buttons">
+						<button class="welcome-btn" onclick="window.location.href='#'">contact us</button>
+						{% if not app.user %}
+							<a href="{{ path('app_login') }}" class="welcome-btn" style="background-color: #4CAF50;">
+								<i class="fa fa-sign-in"></i> Se connecter
+							</a>
+						{% endif %}
+					</div>
 				</div>
 			</div>
 
@@ -793,7 +884,9 @@
 
 		  {% endblock %} 
 		<!-- Include all js compiled plugins (below), or include individual files as needed -->
+
 ●	●	{% block js %}
+
 		<!-- JavaScript files -->
         <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
         <script src="{{ asset('assets/js/bootstrap.min.js') }}"></script>

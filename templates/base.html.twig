@@ -32,7 +32,10 @@
     
     <!-- Nepcha Analytics (nepcha.com) -->
     <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+
   {% endblock %}
   
   {% block head_javascripts %}{% endblock %}
@@ -1177,6 +1180,7 @@
   </div>
 
 
+
   {% endblock %}
   {% block javascripts %}
     <!-- Core JS Files -->
@@ -1371,6 +1375,19 @@
     <script src="{{ asset('assetsB/js/soft-ui-dashboard.min.js?v=1.1.0') }}"></script>
   {% endblock %}
 {% block bottom_javascripts %}{% endblock %}
+
+{% block javascripts %}
+    <!-- Core JS Files -->
+    <script src="{{ asset('assetsB/js/core/popper.min.js') }}"></script>
+    <script src="{{ asset('assetsB/js/core/bootstrap.min.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ asset('assetsB/js/plugins/perfect-scrollbar.min.js') }}"></script>
+    <script src="{{ asset('assetsB/js/plugins/smooth-scrollbar.min.js') }}"></script>
+    <script src="{{ asset('assetsB/js/soft-ui-dashboard.min.js') }}"></script>
+{% endblock %}
+{% block bottom_javascripts %}{% endblock %}
+
+  {% endblock %}
 </body>
 
 </html>
