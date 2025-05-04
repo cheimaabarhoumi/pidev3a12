@@ -20,7 +20,11 @@
                     <h6 class="m-0 font-weight-bold text-primary">Informations du sponsoring</h6>
                 </div>
                 <div class="card-body">
-                    {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                    {{ form_start(form, {
+                        'action': path('app_sponsoring_checkout'),
+                        'method': 'POST',
+                        'attr': {'class': 'needs-validation'}
+                    }) }}
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -33,7 +37,7 @@
                                 <div class="form-group">
                                     {{ form_label(form.montant, 'Montant', {'label_attr': {'class': 'form-label'}}) }}
                                     <div class="input-group">
-                                        {{ form_widget(form.montant, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le montant'}}) }}
+                                        {{ form_widget(form.montant, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le montant', 'readonly': true}}) }}
                                         <span class="input-group-text">DT</span>
                                     </div>
                                     {{ form_errors(form.montant, {'attr': {'class': 'form-text text-danger'}}) }}
@@ -115,8 +119,34 @@
 </div>
 
 {% block javascripts %}
+{{ parent() }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const typeField = document.getElementById('sponsoring_typeSponsoring');
+    const montantField = document.getElementById('sponsoring_montant');
+
+    const tarifs = {
+        'Standard': 10,
+        'Premium': 25,
+        'Or': 40,
+        'Platine': 60,
+        'Boost Express': 5
+    };
+
+    function updateMontant() {
+        const type = typeField.value;
+        if (tarifs[type]) {
+            montantField.value = tarifs[type];
+        } else {
+            montantField.value = '';
+        }
+    }
+
+    typeField.addEventListener('change', updateMontant);
+
+    // Met à jour au chargement si déjà sélectionné
+    updateMontant();
+
     // Validation de la date de fin
     const dateDebut = document.querySelector('#sponsoring_dateDebut');
     const dateFin = document.querySelector('#sponsoring_dateFin');

@@ -12,6 +12,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Knp\Component\Pager\PaginatorInterface;
+use Stripe\Stripe;
+use Stripe\Checkout\Session as StripeSession;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 
 
 
@@ -52,24 +56,89 @@ class SponsoringController extends AbstractController
     }
 
     #[Route('/new', name: 'app_sponsoring_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request): Response
     {
         $sponsoring = new Sponsoring();
         $form = $this->createForm(SponsoringType::class, $sponsoring);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($sponsoring);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Le sponsoring a été créé avec succès.');
-            return $this->redirectToRoute('app_sponsoring_index');
+            // Redirige vers la route checkout (POST)
+            return $this->redirectToRoute('app_sponsoring_checkout', [], 307);
         }
 
         return $this->render('sponsoring/new.html.twig', [
             'sponsoring' => $sponsoring,
             'form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/checkout', name: 'app_sponsoring_checkout', methods: ['POST'])]
+    public function checkout(Request $request, SessionInterface $session): Response
+    {
+        // Récupère les données du formulaire
+        $formData = $request->request->all('sponsoring');
+        // Stocke temporairement en session
+        $session->set('pending_sponsoring', $formData);
+
+        // Montant en centimes
+        $amount = (float) $formData['montant'] * 100;
+
+        \Stripe\Stripe::setApiKey($this->getParameter('stripe_secret_key'));
+
+        $checkoutSession = StripeSession::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => 'eur',
+                    'product_data' => [
+                        'name' => 'Sponsoring pour ' . $formData['nomPartenaire'],
+                    ],
+                    'unit_amount' => (int) $amount,
+                ],
+                'quantity' => 1,
+            ]],
+            'mode' => 'payment',
+            'success_url' => $this->generateUrl('app_sponsoring_success', [], 0),
+            'cancel_url' => $this->generateUrl('app_sponsoring_cancel', [], 0),
+        ]);
+
+        return $this->redirect($checkoutSession->url, 303);
+    }
+
+    #[Route('/success', name: 'app_sponsoring_success')]
+    public function success(SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        $formData = $session->get('pending_sponsoring');
+        if (!$formData) {
+            $this->addFlash('danger', 'Aucune donnée de sponsoring trouvée.');
+            return $this->redirectToRoute('app_sponsoring_new');
+        }
+
+        // Création de l'entité Sponsoring
+        $sponsoring = new Sponsoring();
+        $sponsoring->setNomPartenaire($formData['nomPartenaire']);
+        $sponsoring->setMontant((float) $formData['montant']);
+        $sponsoring->setDateDebut(new \DateTime($formData['dateDebut']));
+        $sponsoring->setDateFin(new \DateTime($formData['dateFin']));
+        $sponsoring->setTypeSponsoring($formData['typeSponsoring']);
+        $sponsoring->setEtat($formData['etat']);
+
+        $entityManager->persist($sponsoring);
+        $entityManager->flush();
+
+        $session->remove('pending_sponsoring');
+
+        $this->addFlash('success', 'Le paiement a été validé et le sponsoring créé avec succès.');
+        return $this->redirectToRoute('app_sponsoring_index');
+    }
+
+    #[Route('/cancel', name: 'app_sponsoring_cancel')]
+    public function cancel(SessionInterface $session): Response
+    {
+        $session->remove('pending_sponsoring');
+        $this->addFlash('warning', 'Le paiement a été annulé.');
+        return $this->redirectToRoute('app_sponsoring_new');
     }
 
     #[Route('/{id}', name: 'app_sponsoring_show', methods: ['GET'])]
@@ -123,6 +192,4 @@ class SponsoringController extends AbstractController
 
         return $this->redirectToRoute('app_sponsoring_show', ['id' => $sponsoring->getId()]);
     }
-
-
 }
