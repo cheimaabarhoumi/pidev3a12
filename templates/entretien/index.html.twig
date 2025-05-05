@@ -1,0 +1,80 @@
+{% extends 'front.html.twig' %}
+
+{% block title %}Gestion des Entretiens | CarVilla{% endblock %}
+
+{% block page_content %}
+<div class="entretien-management">
+    <div class="container">
+        <!-- Header avec bouton de création -->
+        <div class="entretien-header">
+            <h1>Gestion des Entretiens</h1>
+            <a href="{{ path('app_entretien_new') }}" class="btn btn-action">
+                <i class="fa fa-plus"></i> Nouvel entretien
+            </a>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="entretien-stats">
+            <div class="stat-card">
+                <h3>Total</h3>
+                <p>{{ total_entretiens }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Terminés</h3>
+                <p>{{ entretiens_termines }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>En attente</h3>
+                <p>{{ entretiens_attente }}</p>
+            </div>
+        </div>
+
+        <!-- Tableau -->
+        <div class="table-responsive">
+            <table class="entretien-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Coût</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entretien in entretiens %}
+                    <tr>
+                        <td>{{ entretien.typeEntretien }}</td>
+                        <td>{{ entretien.datePlanifiee|date('d/m/Y') }}</td>
+                        <td>{{ entretien.cout }} €</td>
+                        <td>
+                            <span class="entretien-status entretien-status-{{ entretien.status|lower|replace({' ': '-'}) }}">
+                                {{ entretien.status }}
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <a href="{{ path('app_entretien_show', {'id': entretien.id}) }}" class="btn-view">
+                                <i class="fa fa-eye"></i>
+                            </a>
+                            <a href="{{ path('app_entretien_edit', {'id': entretien.id}) }}" class="btn-edit">
+                                <i class="fa fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="no-records">Aucun entretien programmé</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Calendrier -->
+        <div class="calendar-section">
+            <h2>Calendrier des entretiens</h2>
+            <div id="entretien-calendar"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
