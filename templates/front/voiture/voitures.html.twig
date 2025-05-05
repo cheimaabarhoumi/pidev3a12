@@ -1,0 +1,127 @@
+{% extends '/front/accueil/accueil.html.twig' %}
+
+{% block title %}Nos Voitures{% endblock %}
+{% block accueil_services %}{% endblock %}
+{% block accueil_featured %}{% endblock %}
+{% block recherche %}{% endblock %}
+
+{% block accueil_voitures %}
+<section id="new-cars" class="new-cars">
+    <div class="container">
+        <div class="section-header">
+            <p>Consultez <span>nos</span> voitures</p>
+            <h2>Mes Voitures</h2>
+        </div>
+
+        <div class="new-cars-content">
+            <div class="owl-carousel owl-theme" id="new-cars-carousel">
+                {% for voiture in voitures %}
+                    <div class="new-cars-item">
+                        <div class="single-new-cars-item">
+                            <div class="row">
+                                <div class="col-md-7 col-sm-12">
+                                    <div class="new-cars-img">
+                                        <img src="{{ asset('uploads/' ~ voiture.image) }}" alt="{{ voiture.marque }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-5 col-sm-12">
+                                    <div class="new-cars-txt">
+                                        <h2><a href="#">{{ voiture.marque }} {{ voiture.modele }}</a></h2>
+                                        <p class="new-cars-para2">
+                                            Année : {{ voiture.annee }} <br>
+                                            Prix : {{ voiture.prix }} TND<br>
+                                            Kilométrage : {{ voiture.kilometrage }} km<br>
+                                            Puissance fiscale : {{ voiture.puissancefiscale }} CV<br>
+                                            Cylindrée : {{ voiture.cylindree }} cm³<br>
+                                            Boîte : {{ voiture.boitevitesse }}<br>
+                                            Carburant : {{ voiture.carburant }}<br>
+                                            Nombre de portes : {{ voiture.nombreportes }}
+                                        </p>
+                                        <div class="d-flex justify-content-between mt-3">
+                                            <button type="button"
+                                                    onclick="window.location.href='{{ path('edit_voiture', {id: voiture.id}) }}'"
+                                                    class="btn-custom btn-edit">
+                                                Modifier
+                                            </button>
+
+                                            <form method="post" action="{{ path('voiture_delete', {id: voiture.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette voiture ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ voiture.id) }}">
+                                                <button class="btn-custom btn-delete">
+                                                    Supprimer
+                                                </button>
+                                            </form>
+
+
+                                               <!-- Ajouter un bouton pour créer une annonce -->
+                                            <button type=button class="btn-custom btn-annonce "
+                                                    onclick="window.location.href='{{ path('create_annonce', {voitureId: voiture.id}) }}'"
+                                                    class="btn-custom btn-create-annonce">
+                                                Créer une annonce
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>Aucune voiture trouvée.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mb-4">
+        <a href="{{ path('voiture_add') }}" class="btn btn-primary welcome-btn new-cars-btn">
+            Ajouter une voiture
+        </a>
+    </div>
+
+    <style>
+        .btn-custom {
+            padding: 10px 25px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: none;
+            text-decoration: none;
+            color: #572a2a;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            white-space: nowrap; /* <-- Pour éviter que les textes se coupent */
+        }
+        .btn-edit {
+            background-color: #f0ad4e;
+            padding: 2rem 5rem;
+            font-size: 2.0rem;
+            border-radius: 1.5rem;
+            margin-top: 2rem;
+        }
+        .btn-delete {
+            background-color: #d9534f;
+            padding: 2rem 5rem;
+            font-size: 2.0rem;
+            border-radius: 1.5rem;
+            margin-top: 2rem;
+        }
+        .btn-annonce {
+                background-color:rgb(79, 107, 217);
+            padding: 2rem 5rem;
+            font-size: 2.0rem;
+            border-radius: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        /* Agrandir le bouton Ajouter une voiture */
+        .welcome-btn.new-cars-btn {
+            
+        }
+
+        .welcome-btn.new-cars-btn:hover {
+           
+        }
+    </style>
+</section>
+
+{% endblock %}
+{% block client %} {% endblock %}
