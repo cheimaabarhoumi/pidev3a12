@@ -1,0 +1,190 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_heading %}Dashboard Overview{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-xl-3 col-sm-6 mb-4">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="numbers">
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Contrats</p>
+                            <h5 class="font-weight-bolder mb-0">
+                                {{ contracts_count ?? 0 }}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-4 text-end">
+                        <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                            <i class="fas fa-file-contract text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-4">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="numbers">
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Contrats Actifs</p>
+                            <h5 class="font-weight-bolder mb-0">
+                                {{ active_contracts ?? 0 }}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-4 text-end">
+                        <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md">
+                            <i class="fas fa-check text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-4">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="numbers">
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Clients</p>
+                            <h5 class="font-weight-bolder mb-0">
+                                {{ clients_count ?? 0 }}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-4 text-end">
+                        <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                            <i class="fas fa-users text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-4">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="numbers">
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Montant Total</p>
+                            <h5 class="font-weight-bolder mb-0">
+                                {{ total_amount|number_format(2, ',', ' ') }} €
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-4 text-end">
+                        <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-md">
+                            <i class="fas fa-euro-sign text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{# Search Form #}
+{# <div class="row mb-4">
+    <div class="col-12">
+        <form method="get" class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Rechercher un contrat" value="{{ search_term }}">
+            <button type="submit" class="btn btn-primary">Rechercher</button>
+        </form>
+    </div>
+</div> #}
+<div class="row mb-4">
+    <div class="col-12">
+        <input type="text" id="search-input" class="form-control" placeholder="Rechercher un contrat" autocomplete="off">
+    </div>
+</div>
+<!-- R
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Référence</th>
+            <th>Intitulé</th>
+            <th>Date début</th>
+            <th>Date fin</th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>Clauses</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="contrat-results">
+        {% include 'admin/contrat/_search_results.html.twig' with {contrats: contrats} %}
+    </tbody>
+</table>
+
+ecent Contracts Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header pb-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6>Contrats Récents</h6>
+                    <a href="{{ path('admin_contrat_index') }}" class="btn btn-primary btn-sm mb-0">
+                        <i class="fas fa-list"></i> Voir tous les contrats
+                    </a>
+                </div>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0 table-striped">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Référence</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Intitulé</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Début</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Fin</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Montant</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Statut</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Clauses</th>
+                                <th class="text-secondary opacity-7"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="contrat-results">
+                            {% include 'admin/contrat/_search_results.html.twig' with {contrats: contrats} %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %} 
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('search-input');
+        const resultsContainer = document.getElementById('contrat-results');
+
+        input.addEventListener('input', function () {
+            const query = input.value;
+
+            fetch(`/admin/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.text())
+                .then(html => {
+                    resultsContainer.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error('Erreur AJAX :', err);
+                });
+        });
+    });
+    </script>
+{% endblock %}
